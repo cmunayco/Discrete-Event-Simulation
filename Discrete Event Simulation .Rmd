@@ -1,0 +1,41 @@
+---
+title: "Discrete Event Simulation"
+author: "Cesar Munayco"
+date: "January 12, 2015"
+output: html_document
+---
+
+An example
+Let’s say we want to simulate a very simple patient trajectory; a patient enters the hospital and has to register at the desk, next, is seen by a nurse for an intake and finally is met by the doctor for a consult.
+
+```{r,echo=TRUE}
+# An example
+#Let’s say we want to simulate a very simple patient trajectory; a patient enters the #hospital and has to register at the desk, next, is seen by a nurse for an intake and #finally is met by the doctor for a consult.
+
+#Below this trajectory is written as a ‘trajectory dataframe’.
+library(simmer)
+
+trajectory <- read.table(header=T, text=
+                           "event_id  description   resource        amount  duration          successor
+                         1         registration  administration  1       runif(1,3,10)     2
+                         2         intake        nurse           1       runif(1,10,20)    3
+                         3         consultation  doctor          1       runif(1,5,15)     NA"  )
+
+trajectory
+```
+
+
+
+```{r, echo=TRUE}
+
+sim <-
+  create_simulator(name = "SuperDuperSim") %>%
+  add_trajectory(name = "simple_trajectory", trajectory_df = trajectory) %>%
+  add_resource(name = "administration", capacity = 1) %>%
+  add_resource(name = "nurse", capacity = 1) %>%
+  add_resource(name = "doctor", capacity = 2) %>%
+  add_entities_with_interval(n = 10, name_prefix = "patient", trajectory_name = "simple_trajectory", interval = "rnorm(1,10)") %>%
+  replicator(15)
+
+```
+
